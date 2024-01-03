@@ -39,6 +39,7 @@ namespace ASPNET_WebAPI.Controllers
             return await _context.Applicants.Include(x => x.Applicant_Vacancy).ToListAsync();
         }
 
+
         // GET: api/Applicant/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Applicant>> GetApplicant(string id)
@@ -60,7 +61,7 @@ namespace ASPNET_WebAPI.Controllers
         // PUT: api/Applicant/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutApplicant(string id,[FromForm] UpdateApplicantImage applicant)
+        public async Task<IActionResult> PutApplicant(string id, [FromForm] UpdateApplicantImage applicant)
         {
             if (id != applicant.Applicant_Id)
             {

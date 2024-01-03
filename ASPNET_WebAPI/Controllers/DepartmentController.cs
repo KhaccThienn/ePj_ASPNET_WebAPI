@@ -9,11 +9,14 @@ using ASPNET_WebAPI.Models.Data;
 using ASPNET_WebAPI.Models.Domains;
 using ASPNET_WebAPI.Models.Status;
 using ASPNET_WebAPI.Utils;
+using Microsoft.AspNetCore.Authorization;
+using ASPNET_WebAPI.Models.Enums;
 
 namespace ASPNET_WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "ADMIN")]
     public class DepartmentController : ControllerBase
     {
         private readonly DataContext _context;
@@ -166,6 +169,6 @@ namespace ASPNET_WebAPI.Controllers
             return (_context.Departments?.Any(e => e.DepartmentId == id)).GetValueOrDefault();
         }
 
-        
+
     }
 }
