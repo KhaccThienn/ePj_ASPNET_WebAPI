@@ -37,7 +37,7 @@ namespace ASPNET_WebAPI.Controllers
             {
                 return NotFound();
             }
-            return await _context.Departments.Include(d => d.Vacancies).Include(d => d.Employees).ToListAsync();
+            return await _context.Departments.OrderByDescending(x => x.Created_Date).Include(d => d.Vacancies).Include(d => d.Employees).ToListAsync();
         }
 
         // GET: api/Department/5
@@ -49,6 +49,24 @@ namespace ASPNET_WebAPI.Controllers
                 return NotFound();
             }
             var department = await _context.Departments.Include(d => d.Vacancies).Include(d => d.Employees).FirstOrDefaultAsync(x => x.DepartmentId == id);
+
+            if (department == null)
+            {
+                return NotFound();
+            }
+
+            return department;
+        }
+
+        // GET: api/Department/5
+        [HttpGet("search/{name}")]
+        public async Task<ActionResult<IEnumerable<Department>>> GetDepartmentByName(string name)
+        {
+            if (_context.Departments == null)
+            {
+                return NotFound();
+            }
+            var department = await _context.Departments.Include(d => d.Vacancies).Include(d => d.Employees).Where(x => x.Name.Contains(name)).ToListAsync();
 
             if (department == null)
             {
@@ -155,10 +173,14 @@ namespace ASPNET_WebAPI.Controllers
             {
                 return NotFound(new Status(404, "Not Found Id To Delete"));
             }
-            var department = await _context.Departments.FindAsync(id);
+            var department = await _context.Departments.Include(d => d.Vacancies).Include(d => d.Employees).FirstOrDefaultAsync(x => x.DepartmentId == id);
             if (department == null)
             {
                 return NotFound(new Status(404, "Not Found Id To Delete"));
+            }
+            if (department.Employees.Count > 0 || department.Vacancies.Count > 0)
+            {
+                return BadRequest(new Status(500, "Cannot Delete "));
             }
 
             _context.Departments.Remove(department);

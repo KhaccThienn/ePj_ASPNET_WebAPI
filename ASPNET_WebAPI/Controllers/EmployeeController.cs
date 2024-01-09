@@ -58,6 +58,28 @@ namespace ASPNET_WebAPI.Controllers
             return employee;
         }
 
+        // GET: api/Department/5
+        [HttpGet("search/{name}")]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetAllByName(string name)
+        {
+            if (_context.Employees == null)
+            {
+                return NotFound();
+            }
+            
+            var employees = await _context.Employees.Include(e => e.Vacancies).Include(e => e.Department).Include(x => x.Interviews).Where(x => x.Employee_Name.Contains(name)).ToListAsync();
+
+            if (employees == null)
+            {
+                return NotFound();
+            }
+            if (string.IsNullOrEmpty(name))
+            {
+                return await _context.Employees.Include(e => e.Vacancies).Include(e => e.Department).Include(x => x.Interviews).ToListAsync();
+            }
+            return employees;
+        }
+
         // PUT: api/Employee/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -72,7 +94,7 @@ namespace ASPNET_WebAPI.Controllers
                 return BadRequest(new Status(400, "Email already in use", null));
             }
 
-            if (employee.ImageFile.Length > 0)
+            if (employee.ImageFile?.Length > 0)
             {
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "employee", employee.ImageFile.FileName);
                 var oldFileName = employee.OldImage.Split($"{HttpContext.Request.Host.Value}/uploads/employee/");
@@ -234,7 +256,13 @@ namespace ASPNET_WebAPI.Controllers
             {
                 return NotFound(new Status(404, "Not Found Id To Delete"));
             }
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _context.Employees.Include(e => e.Vacancies).Include(e => e.Department).Include(x => x.Interviews).FirstOrDefaultAsync(x => x.Employee_Number == id);
+
+            if (employee.Vacancies.Count > 0 || employee.Interviews.Count > 0)
+            {
+                return BadRequest(new Status(400, "Cannot Delete"));
+            }
+
             var oldFileName = employee.Avatar.Split($"{HttpContext.Request.Host.Value}/uploads/employee/");
             Console.WriteLine($"Emp old File: {oldFileName[1]}");
             var pathOldFile = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "employee", oldFileName[1]);
