@@ -11,7 +11,7 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 builder.Services.AddCors(o =>
 {
-    o.AddPolicy("AllowOrigin", p =>
+    o.AddPolicy("AllowOrigins", p =>
     {
         p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });

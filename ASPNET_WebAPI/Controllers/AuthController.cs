@@ -4,6 +4,7 @@ using ASPNET_WebAPI.Models.DTOs;
 using ASPNET_WebAPI.Models.Status;
 using ASPNET_WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ using System.Text;
 
 namespace ASPNET_WebAPI.Controllers
 {
+    [EnableCors("AllowOrigins")]
     [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -32,16 +34,16 @@ namespace ASPNET_WebAPI.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDTO model)
         {
             var hashedPass = PasswordBusiness.HashPassword(model.Password);
-            var userFound = await _context.Employees.FirstOrDefaultAsync(x => x.Username == model.Username);
+            var userFound = await _context.Employees.FirstOrDefaultAsync(x => x.Username == model.Username && x.Role == model.Role);
 
             if (userFound == null)
             {
-                return new JsonResult(new Status(400, "Login Failed"));
+                return BadRequest(new Status(400, "Login Failed"));
             }
 
             if (!PasswordBusiness.VerifyHashedPassword(userFound.Password, model.Password))
             {
-                return Ok(new Status(400, "Password Does Not Match"));
+                return BadRequest(new Status(400, "Password Does Not Match"));
             }
 
             // lay key tu appconfig
@@ -62,7 +64,7 @@ namespace ASPNET_WebAPI.Controllers
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
-                expires: DateTime.Now.AddHours(1),
+                expires: DateTime.Now.AddHours(24),
                 signingCredentials: signingCredential,
                 claims: claims
                 );

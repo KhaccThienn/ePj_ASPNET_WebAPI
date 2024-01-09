@@ -15,7 +15,7 @@ namespace ASPNET_WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "ADMIN")]
+    //[Authorize(Roles = "ADMIN")]
     public class Applicant_VacancyController : ControllerBase
     {
         private readonly DataContext _context;
@@ -94,9 +94,26 @@ namespace ASPNET_WebAPI.Controllers
                 return Problem("Entity set 'DataContext.Applicant_Vacancy'  is null.");
             }
             applicant_Vacancy.DateAttached = DateTime.Now;
-            _context.Applicant_Vacancy.Add(applicant_Vacancy);
+
+            var currentVacancy = await _context.Vacancies.Include(x => x.Applicant_Vacancy).FirstOrDefaultAsync(x => x.Vacancy_Number == applicant_Vacancy.VacancyId);
+
+            if (currentVacancy.Applicant_Vacancy.Count >= currentVacancy.NumberOfJobs)
+            {
+                currentVacancy.Status = Models.Enums.VacancyStatus.CLOSED;
+                currentVacancy.Closed_Date = DateTime.Now;
+                _context.Update(currentVacancy);
+                await _context.SaveChangesAsync();
+
+                return Ok(new Status(400, "Cannot Add More", CreatedAtAction("GetApplicant_Vacancy", new { id = applicant_Vacancy.Id }, applicant_Vacancy)));
+
+            }
+            else
+            {
+                _context.Applicant_Vacancy.Add(applicant_Vacancy);
+            }
+
             await _context.SaveChangesAsync();
-            return Ok(new Status(200, "Update successfully", CreatedAtAction("GetApplicant_Vacancy", new { id = applicant_Vacancy.Id }, applicant_Vacancy)));
+            return Ok(new Status(200, "Add successfully", CreatedAtAction("GetApplicant_Vacancy", new { id = applicant_Vacancy.Id }, applicant_Vacancy)));
         }
 
         // DELETE: api/Applicant_Vacancy/5

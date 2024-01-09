@@ -11,12 +11,15 @@ using ASPNET_WebAPI.Models.Status;
 using ASPNET_WebAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using ASPNET_WebAPI.Models.Enums;
+using Microsoft.AspNetCore.Cors;
 
 namespace ASPNET_WebAPI.Controllers
 {
+
+    //[Authorize(Roles = "ADMIN")]
+    [EnableCors("AllowOrigins")]
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "ADMIN")]
     public class DepartmentController : ControllerBase
     {
         private readonly DataContext _context;
