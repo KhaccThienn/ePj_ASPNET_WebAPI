@@ -37,7 +37,8 @@ namespace ASPNET_WebAPI.Controllers
             {
                 return NotFound();
             }
-            return await _context.Employees.Include(e => e.Vacancies).Include(e => e.Department).Include(x => x.Interviews).ToListAsync();
+            var employees = await _context.Employees.Include(e => e.Vacancies).Include(e => e.Department).Include(x => x.Interviews).ToListAsync();
+            return employees;
         }
 
         // GET: api/Employee/5

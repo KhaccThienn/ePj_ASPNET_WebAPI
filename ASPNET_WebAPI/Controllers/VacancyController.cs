@@ -9,9 +9,11 @@ using ASPNET_WebAPI.Models.Data;
 using ASPNET_WebAPI.Models.Domains;
 using ASPNET_WebAPI.Models.Status;
 using ASPNET_WebAPI.Utils;
+using Microsoft.AspNetCore.Cors;
 
 namespace ASPNET_WebAPI.Controllers
 {
+    [EnableCors("AllowOrigins")]
     [Route("api/[controller]")]
     [ApiController]
     public class VacancyController : ControllerBase
@@ -31,7 +33,7 @@ namespace ASPNET_WebAPI.Controllers
             {
                 return NotFound(new Status(500, "Entry set _context.Vacancies is null"));
             }
-            return await _context.Vacancies.Include(x => x.OwnedBy).Include(x => x.Applicant_Vacancy).Include(x => x.Department).ToListAsync();
+            return await _context.Vacancies.OrderByDescending(x => x.Created_Date).Include(x => x.OwnedBy).Include(x => x.Applicant_Vacancy).Include(x => x.Department).ToListAsync();
         }
 
         // GET: api/Vacancy/5
@@ -43,6 +45,23 @@ namespace ASPNET_WebAPI.Controllers
                 return NotFound(new Status(404, "Entry set _context.Vacancies is null"));
             }
             var vacancy = await _context.Vacancies.Include(x => x.OwnedBy).Include(x => x.Applicant_Vacancy).Include(x => x.Department).FirstOrDefaultAsync(x => x.Vacancy_Number == id);
+
+            if (vacancy == null)
+            {
+                return NotFound(new Status(404, "Cannot Found Vacancy"));
+            }
+
+            return vacancy;
+        }
+
+        [HttpGet("search/{id}")]
+        public async Task<ActionResult<IEnumerable<Vacancy>>> GetVacanciesss(string id)
+        {
+            if (_context.Vacancies == null)
+            {
+                return NotFound(new Status(404, "Entry set _context.Vacancies is null"));
+            }
+            var vacancy = await _context.Vacancies.Include(x => x.OwnedBy).Include(x => x.Applicant_Vacancy).Include(x => x.Department).Where(x => x.Vacancy_Number.Contains(id)).ToListAsync();
 
             if (vacancy == null)
             {

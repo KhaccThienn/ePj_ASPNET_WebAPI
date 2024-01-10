@@ -30,10 +30,10 @@ namespace ASPNET_WebAPI.Models.DTOs
 
         public ApplicantStatus Status { get; set; } = ApplicantStatus.NOT_IN_PROCESS;
 
-        public DateTime? Created_Date { get; set; } = DateTime.Now;
+        public DateTime? Created_Date { get; set; }
 
         public DateTime? Updated_Date { get; set; }
 
-        public IFormFile ImageFile { get; set; }
+        public IFormFile? ImageFile { get; set; }
     }
 }

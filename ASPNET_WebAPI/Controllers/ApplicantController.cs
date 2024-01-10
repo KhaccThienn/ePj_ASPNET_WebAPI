@@ -36,7 +36,7 @@ namespace ASPNET_WebAPI.Controllers
             {
                 return NotFound();
             }
-            return await _context.Applicants.Include(x => x.Applicant_Vacancy).ToListAsync();
+            return await _context.Applicants.OrderByDescending(x => x.Created_Date).Include(x => x.Applicant_Vacancy).ToListAsync();
         }
 
 
@@ -49,6 +49,23 @@ namespace ASPNET_WebAPI.Controllers
                 return NotFound(new Status(404, "Entry _context.Applicants is null here"));
             }
             var applicant = await _context.Applicants.Include(x => x.Applicant_Vacancy).FirstOrDefaultAsync(x => x.Applicant_Id == id);
+
+            if (applicant == null)
+            {
+                return NotFound(new Status(404, "Not Found Applicant"));
+            }
+
+            return applicant;
+        }
+
+        [HttpGet("search/{id}")]
+        public async Task<ActionResult<IEnumerable<Applicant>>> GetApplicantsss(string id)
+        {
+            if (_context.Applicants == null)
+            {
+                return NotFound(new Status(404, "Entry _context.Applicants is null here"));
+            }
+            var applicant = await _context.Applicants.OrderByDescending(x => x.Created_Date).Include(x => x.Applicant_Vacancy).ToListAsync();
 
             if (applicant == null)
             {
@@ -72,7 +89,7 @@ namespace ASPNET_WebAPI.Controllers
                 return BadRequest(new Status(400, "Email already in use", null));
             }
 
-            if (applicant.ImageFile.Length > 0)
+            if (applicant.ImageFile?.Length > 0)
             {
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "applicant", applicant.ImageFile.FileName);
                 var oldFileName = applicant.OldImage.Split($"{HttpContext.Request.Host.Value}/uploads/applicant/");
@@ -92,7 +109,6 @@ namespace ASPNET_WebAPI.Controllers
             {
                 applicant.Avatar = applicant.OldImage;
             }
-
             applicant.Updated_Date = DateTime.Now;
             var app = _mapper.Map<Applicant>(applicant);
             _context.Entry(app).State = EntityState.Modified;

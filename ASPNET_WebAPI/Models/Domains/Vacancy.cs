@@ -28,6 +28,15 @@ namespace ASPNET_WebAPI.Models.Domains
         [Column]
         public int NumberOfJobs { get; set; }
 
+        [Column(TypeName = "nvarchar(150)")]
+        public string RequiredSkill { get; set; }
+
+        [Column(TypeName = "nvarchar(150)")]
+        public string Experience { get; set; }
+
+        [Column(TypeName = "nvarchar(150)")]
+        public string Location { get; set; }
+
         [Column(TypeName = "ntext")]
         public string Descriptions { get; set; }
 
