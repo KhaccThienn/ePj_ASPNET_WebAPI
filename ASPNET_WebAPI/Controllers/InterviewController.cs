@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ASPNET_WebAPI.Models.Data;
 using ASPNET_WebAPI.Models.Domains;
+using ASPNET_WebAPI.Models.Status;
+using Microsoft.AspNetCore.Cors;
 
 namespace ASPNET_WebAPI.Controllers
 {
+    [EnableCors("AllowOrigins")]
     [Route("api/[controller]")]
     [ApiController]
     public class InterviewController : ControllerBase
@@ -29,7 +32,7 @@ namespace ASPNET_WebAPI.Controllers
             {
                 return NotFound();
             }
-            return await _context.Interview.ToListAsync();
+            return await _context.Interview.Include(x => x.Applicant_Vacancy).Include(x => x.Vacancy).Include(x => x.Applicant).Include(x => x.Employee).ToListAsync();
         }
 
         // GET: api/Interview/5
@@ -38,13 +41,13 @@ namespace ASPNET_WebAPI.Controllers
         {
             if (_context.Interview == null)
             {
-                return NotFound();
+                return NotFound(new Status(404, "Entry Interview is Null", null));
             }
-            var interview = await _context.Interview.FindAsync(id);
+            var interview = await _context.Interview.Include(x => x.Employee).Include(x => x.Vacancy).Include(x => x.Applicant).Include(x => x.Applicant_Vacancy).FirstOrDefaultAsync(x => x.InterviewId == id);
 
             if (interview == null)
             {
-                return NotFound();
+                return NotFound(new Status(404, "Cannot interview Employee", null));
             }
 
             return interview;
@@ -59,7 +62,7 @@ namespace ASPNET_WebAPI.Controllers
             {
                 return BadRequest();
             }
-
+            interview.Updated_Date = DateTime.Now;
             _context.Entry(interview).State = EntityState.Modified;
 
             try
@@ -78,7 +81,7 @@ namespace ASPNET_WebAPI.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(new Status(201, "Update Success", interview));
         }
 
         // POST: api/Interview
@@ -90,10 +93,15 @@ namespace ASPNET_WebAPI.Controllers
             {
                 return Problem("Entity set 'DataContext.Interview'  is null.");
             }
+            if (DateTime.Compare(DateTime.Now, interview.InterviewDate) > 0)
+            {
+                return BadRequest(new Status(400, "The interview date must be in the future"));
+            }
+            interview.Created_Date = DateTime.Now;
             _context.Interview.Add(interview);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetInterview", new { id = interview.InterviewId }, interview);
+            return Ok(new Status(200, "Create Success", CreatedAtAction("GetInterview", new { id = interview.InterviewId }, interview))) ;
         }
 
         // DELETE: api/Interview/5
@@ -102,18 +110,18 @@ namespace ASPNET_WebAPI.Controllers
         {
             if (_context.Interview == null)
             {
-                return NotFound();
+                return NotFound(new Status(404, "context Interview Is Null"));
             }
             var interview = await _context.Interview.FindAsync(id);
             if (interview == null)
             {
-                return NotFound();
+                return NotFound(new Status(404, "Not Found Record To Delete"));
             }
 
             _context.Interview.Remove(interview);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new Status(201, "Delete Success", interview));
         }
 
         private bool InterviewExists(int id)

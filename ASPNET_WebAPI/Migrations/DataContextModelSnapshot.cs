@@ -182,36 +182,51 @@ namespace ASPNET_WebAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InterviewId"));
 
+                    b.Property<string>("Applicant_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("Applicant_Vacancy_Id")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("Created_Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateEnd")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("DateEnd")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DateStarted")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("DateStarted")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmployeeNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("InterviewDate")
+                    b.Property<DateTime?>("InterviewDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("InterviewStatus")
+                    b.Property<int?>("InterviewStatuss")
                         .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("ntext");
 
                     b.Property<DateTime?>("Updated_Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Vacancy_Number")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("InterviewId");
+
+                    b.HasIndex("Applicant_Id");
 
                     b.HasIndex("Applicant_Vacancy_Id");
 
                     b.HasIndex("EmployeeNumber");
+
+                    b.HasIndex("Vacancy_Number");
 
                     b.ToTable("Interview");
                 });
@@ -308,6 +323,12 @@ namespace ASPNET_WebAPI.Migrations
 
             modelBuilder.Entity("ASPNET_WebAPI.Models.Domains.Interview", b =>
                 {
+                    b.HasOne("ASPNET_WebAPI.Models.Domains.Applicant", "Applicant")
+                        .WithMany()
+                        .HasForeignKey("Applicant_Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("ASPNET_WebAPI.Models.Domains.Applicant_Vacancy", "Applicant_Vacancy")
                         .WithMany("Interviews")
                         .HasForeignKey("Applicant_Vacancy_Id")
@@ -320,9 +341,19 @@ namespace ASPNET_WebAPI.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("ASPNET_WebAPI.Models.Domains.Vacancy", "Vacancy")
+                        .WithMany()
+                        .HasForeignKey("Vacancy_Number")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Applicant");
+
                     b.Navigation("Applicant_Vacancy");
 
                     b.Navigation("Employee");
+
+                    b.Navigation("Vacancy");
                 });
 
             modelBuilder.Entity("ASPNET_WebAPI.Models.Domains.Vacancy", b =>

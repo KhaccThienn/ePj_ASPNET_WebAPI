@@ -39,6 +39,16 @@ namespace ASPNET_WebAPI.Controllers
             return await _context.Applicants.OrderByDescending(x => x.Created_Date).Include(x => x.Applicant_Vacancy).ToListAsync();
         }
 
+        [HttpGet("validApplicant")]
+        public async Task<ActionResult<IEnumerable<Applicant>>> GetApplicantsValid()
+        {
+            if (_context.Applicants == null)
+            {
+                return NotFound();
+            }
+            return await _context.Applicants.OrderByDescending(x => x.Created_Date).Include(x => x.Applicant_Vacancy).Where(x => x.Status == Models.Enums.ApplicantStatus.IN_PROCESS || x.Status == Models.Enums.ApplicantStatus.NOT_IN_PROCESS).ToListAsync();
+        }
+
 
         // GET: api/Applicant/5
         [HttpGet("{id}")]

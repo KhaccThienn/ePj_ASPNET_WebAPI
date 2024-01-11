@@ -28,7 +28,7 @@ namespace ASPNET_WebAPI.Models.DTOs
 
         public string? Experience { get; set; }
 
-        public ApplicantStatus Status { get; set; } = ApplicantStatus.NOT_IN_PROCESS;
+        public ApplicantStatus Status { get; set; }
 
         public DateTime? Created_Date { get; set; }
 

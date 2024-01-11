@@ -33,7 +33,7 @@ namespace ASPNET_WebAPI.Controllers
             {
                 return NotFound(new Status(500, "Entry set _context.Applicant_Vacancy is null here "));
             }
-            return await _context.Applicant_Vacancy.Include(x => x.Vacancy).Include(x => x.Applicant).Include(x => x.Interviews).ToListAsync();
+            return await _context.Applicant_Vacancy.OrderByDescending(x => x.DateAttached).Include(x => x.Vacancy).Include(x => x.Applicant).Include(x => x.Interviews).ToListAsync();
         }
 
         // GET: api/Applicant_Vacancy/5
@@ -96,6 +96,12 @@ namespace ASPNET_WebAPI.Controllers
             applicant_Vacancy.DateAttached = DateTime.Now;
 
             var currentVacancy = await _context.Vacancies.Include(x => x.Applicant_Vacancy).FirstOrDefaultAsync(x => x.Vacancy_Number == applicant_Vacancy.VacancyId);
+
+            var existedApplicantVacancy = await _context.Applicant_Vacancy.FirstOrDefaultAsync(x => x.VacancyId == applicant_Vacancy.VacancyId && x.ApplicantId == applicant_Vacancy.ApplicantId);
+            if (existedApplicantVacancy != null)
+            {
+                return BadRequest(new Status(400, "Already Have Applicant - Vacancy"));
+            }
 
             if (currentVacancy.Applicant_Vacancy.Count >= currentVacancy.NumberOfJobs)
             {

@@ -255,7 +255,7 @@ namespace ASPNET_WebAPI.Controllers
         {
             if (_context.Employees == null)
             {
-                return NotFound(new Status(404, "Not Found Id To Delete"));
+                return NotFound(new Status(404, "context Employee Is Null"));
             }
             var employee = await _context.Employees.Include(e => e.Vacancies).Include(e => e.Department).Include(x => x.Interviews).FirstOrDefaultAsync(x => x.Employee_Number == id);
 

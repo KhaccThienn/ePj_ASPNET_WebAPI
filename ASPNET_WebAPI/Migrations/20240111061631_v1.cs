@@ -79,12 +79,15 @@ namespace ASPNET_WebAPI.Migrations
                 name: "Vacancy",
                 columns: table => new
                 {
-                    Vacancy_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Vacancy_Number = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Vacancy_Title = table.Column<string>(type: "nvarchar(150)", nullable: false),
                     Date_Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OwnedById = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     NumberOfJobs = table.Column<int>(type: "int", nullable: false),
+                    RequiredSkill = table.Column<string>(type: "nvarchar(150)", nullable: false),
+                    Experience = table.Column<string>(type: "nvarchar(150)", nullable: false),
+                    Location = table.Column<string>(type: "nvarchar(150)", nullable: false),
                     Descriptions = table.Column<string>(type: "ntext", nullable: false),
                     DepartmentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Created_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -93,7 +96,7 @@ namespace ASPNET_WebAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Vacancy", x => x.Vacancy_Id);
+                    table.PrimaryKey("PK_Vacancy", x => x.Vacancy_Number);
                     table.ForeignKey(
                         name: "FK_Vacancy_Department_DepartmentId",
                         column: x => x.DepartmentId,
@@ -132,7 +135,7 @@ namespace ASPNET_WebAPI.Migrations
                         name: "FK_Applicant_Vacancy_Vacancy_VacancyId",
                         column: x => x.VacancyId,
                         principalTable: "Vacancy",
-                        principalColumn: "Vacancy_Id",
+                        principalColumn: "Vacancy_Number",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -142,11 +145,14 @@ namespace ASPNET_WebAPI.Migrations
                 {
                     InterviewId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    InterviewDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateStarted = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateEnd = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    InterviewDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DateStarted = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DateEnd = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EmployeeNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    InterviewStatus = table.Column<int>(type: "int", nullable: false),
+                    Vacancy_Number = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Applicant_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Note = table.Column<string>(type: "ntext", nullable: true),
+                    InterviewStatuss = table.Column<int>(type: "int", nullable: true),
                     Applicant_Vacancy_Id = table.Column<int>(type: "int", nullable: false),
                     Created_Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Updated_Date = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -154,6 +160,12 @@ namespace ASPNET_WebAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Interview", x => x.InterviewId);
+                    table.ForeignKey(
+                        name: "FK_Interview_Applicant_Applicant_Id",
+                        column: x => x.Applicant_Id,
+                        principalTable: "Applicant",
+                        principalColumn: "Applicant_Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Interview_Applicant_Vacancy_Applicant_Vacancy_Id",
                         column: x => x.Applicant_Vacancy_Id,
@@ -165,6 +177,12 @@ namespace ASPNET_WebAPI.Migrations
                         column: x => x.EmployeeNumber,
                         principalTable: "Employee",
                         principalColumn: "Employee_Number",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Interview_Vacancy_Vacancy_Number",
+                        column: x => x.Vacancy_Number,
+                        principalTable: "Vacancy",
+                        principalColumn: "Vacancy_Number",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -184,6 +202,11 @@ namespace ASPNET_WebAPI.Migrations
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Interview_Applicant_Id",
+                table: "Interview",
+                column: "Applicant_Id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Interview_Applicant_Vacancy_Id",
                 table: "Interview",
                 column: "Applicant_Vacancy_Id");
@@ -192,6 +215,11 @@ namespace ASPNET_WebAPI.Migrations
                 name: "IX_Interview_EmployeeNumber",
                 table: "Interview",
                 column: "EmployeeNumber");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Interview_Vacancy_Number",
+                table: "Interview",
+                column: "Vacancy_Number");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Vacancy_DepartmentId",
