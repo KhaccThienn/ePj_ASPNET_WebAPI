@@ -14,7 +14,57 @@ namespace ASPNET_WebAPI.Models.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // ...
-
+            modelBuilder.Entity<Department>()
+                .HasData(
+                    new Department { DepartmentId = "D0001", Name = "System", Created_Date = DateTime.Now },
+                    new Department { DepartmentId = "D0002", Name = "HRD", Created_Date = DateTime.Now },
+                    new Department { DepartmentId = "D0003", Name = "Developement", Created_Date = DateTime.Now }
+                );
+            modelBuilder.Entity<Employee>()
+                .HasData(
+                    new Employee
+                    {
+                        Employee_Number = "E0001",
+                        Employee_Name = "Employee001",
+                        Username = "emp001",
+                        Password = "ABsSNuMHMKcKABH2f99w4+ykLJhZMU81jr/6kC6wKXxXF1MReEAv/DFf5msEhbIpDw==",
+                        Address = "Hanoi",
+                        Avatar = "https://localhost:7144/uploads/employee/default.png",
+                        EmailId = "muzan01@gmail.com",
+                        Gender = true,
+                        Role = Enums.Roles.ADMIN,
+                        DepartmentId = "D0001",
+                        Created_Date = DateTime.Now
+                    },
+                    new Employee
+                    {
+                        Employee_Number = "E0002",
+                        Employee_Name = "Employee002",
+                        Username = "emp002",
+                        Password = "ABsSNuMHMKcKABH2f99w4+ykLJhZMU81jr/6kC6wKXxXF1MReEAv/DFf5msEhbIpDw==",
+                        Address = "Hanoi",
+                        Avatar = "https://localhost:7144/uploads/employee/default.png",
+                        EmailId = "muzan02@gmail.com",
+                        Gender = true,
+                        Role = Enums.Roles.HR,
+                        DepartmentId = "D0002",
+                        Created_Date = DateTime.Now
+                    },
+                    new Employee
+                    {
+                        Employee_Number = "E0003",
+                        Employee_Name = "Employee003",
+                        Username = "emp003",
+                        Password = "ABsSNuMHMKcKABH2f99w4+ykLJhZMU81jr/6kC6wKXxXF1MReEAv/DFf5msEhbIpDw==",
+                        Address = "Hanoi",
+                        Avatar = "https://localhost:7144/uploads/employee/default.png",
+                        EmailId = "muzan03@gmail.com",
+                        Gender = false,
+                        Role = Enums.Roles.INTERVIEW,
+                        DepartmentId = "D0003",
+                        Created_Date = DateTime.Now
+                    }
+                );
             var cascadeFKs = modelBuilder.Model.GetEntityTypes()
                 .SelectMany(t => t.GetForeignKeys())
                 .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade);

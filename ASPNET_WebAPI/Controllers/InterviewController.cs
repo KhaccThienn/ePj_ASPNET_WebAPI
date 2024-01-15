@@ -9,6 +9,7 @@ using ASPNET_WebAPI.Models.Data;
 using ASPNET_WebAPI.Models.Domains;
 using ASPNET_WebAPI.Models.Status;
 using Microsoft.AspNetCore.Cors;
+using ASPNET_WebAPI.Models.Enums;
 
 namespace ASPNET_WebAPI.Controllers
 {
@@ -33,6 +34,16 @@ namespace ASPNET_WebAPI.Controllers
                 return NotFound();
             }
             return await _context.Interview.Include(x => x.Applicant_Vacancy).Include(x => x.Vacancy).Include(x => x.Applicant).Include(x => x.Employee).ToListAsync();
+        }
+
+        [HttpGet("byUserId/{id}")]
+        public async Task<ActionResult<IEnumerable<Interview>>> GetInterviews(string id)
+        {
+            if (_context.Interview == null)
+            {
+                return NotFound();
+            }
+            return await _context.Interview.Include(x => x.Applicant_Vacancy).Include(x => x.Vacancy).Include(x => x.Applicant).Include(x => x.Employee).Where(x => x.EmployeeNumber == id).ToListAsync();
         }
 
         // GET: api/Interview/5
@@ -82,6 +93,37 @@ namespace ASPNET_WebAPI.Controllers
             }
 
             return Ok(new Status(201, "Update Success", interview));
+        }
+
+        [HttpPut("updateStatus/{id}/{status}")]
+        public async Task<IActionResult> UpdateInterviewStatus(int id, int status)
+        {
+            var interview = await _context.Interview.FirstOrDefaultAsync(x => x.InterviewId == id);
+            if (interview == null)
+            {
+                return NotFound(new Status(404, "Not Found Interview Details To Update"));
+            }
+            interview.InterviewStatuss = (InterviewStatus?)status;
+            interview.Updated_Date = DateTime.Now;
+            _context.Entry(interview).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!InterviewExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Ok(new Status(201, "Update Interview Status Success", interview));
         }
 
         // POST: api/Interview

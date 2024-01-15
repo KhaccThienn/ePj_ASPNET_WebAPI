@@ -63,6 +63,11 @@ namespace ASPNET_WebAPI.Controllers
             {
                 return BadRequest();
             }
+            if (applicant_Vacancy.Status == Models.Enums.ApplicantVacancyStatus.SELECTED)
+            {
+                applicant_Vacancy.Applicant.Status = Models.Enums.ApplicantStatus.HIRED;
+                _context.Update(applicant_Vacancy.Applicant);
+            }
             _context.Entry(applicant_Vacancy).State = EntityState.Modified;
 
             try
